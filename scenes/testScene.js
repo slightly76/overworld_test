@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import Player from '../src/player.js';
+import { database, userInventory } from '../src/dummydata.js';
 
 export default class overworldScene extends Phaser.Scene {
 	constructor() {
@@ -34,9 +35,19 @@ export default class overworldScene extends Phaser.Scene {
 		this.doorTrigger.setVisible(false);
 		this.doorTriggered = false;
 
+		//create hidden trigger for planting devling
+		this.plantTrigger = this.physics.add.sprite(272, 400, null);
+		this.plantTrigger.setSize(42, 42);
+		this.plantTrigger.setVisible(false);
+		this.plantTriggered = false;
+
 		//create player and add collision rules
 		this.player = new Player(this, 250, 300, 'playerSheet');
 		this.physics.add.collider(this.player, mapLayer);
+
+		this.spaceKey = this.input.keyboard.addKey(
+			Phaser.Input.Keyboard.KeyCodes.SPACE
+		);
 	}
 
 	update() {
@@ -53,16 +64,51 @@ export default class overworldScene extends Phaser.Scene {
 			playerBounds,
 			this.doorTrigger.getBounds()
 		);
-		if (isOverlapping && !this.doorTriggered) {
+		if (
+			isOverlapping &&
+			!this.doorTriggered &&
+			Phaser.Input.Keyboard.JustDown(this.spaceKey)
+		) {
 			this.doorTriggered = true;
-			console.log('UNACCEPTABLE OVERLAP!!!');
 
-			this.sound.play('unacceptable');
-			this.time.delayedCall(1000, () => {
-				this.cameras.main.shake(1000, 0.01);
-			});
-		} else if (!isOverlapping && this.doorTriggered) {
+			//code for collecting devlings
+			if (database.length > 0 && userInventory.length === 0) {
+				for (let i = 0; i < database.length; i++) {
+					userInventory.push(database[i]);
+				}
+				console.log('devlings collected', userInventory);
+			}
+		} else if (
+			!isOverlapping &&
+			this.doorTriggered
+			//Phaser.Input.Keyboard.JustDown(this.spaceKey)
+		) {
 			this.doorTriggered = false;
+		}
+
+		const isOverlappingPlot = Phaser.Geom.Intersects.RectangleToRectangle(
+			playerBounds,
+			this.plantTrigger.getBounds()
+		);
+		if (
+			isOverlappingPlot &&
+			Phaser.Input.Keyboard.JustDown(this.spaceKey) &&
+			!this.plantingInProgress
+		) {
+			this.plantingInProgress = true;
+			console.log('attempting to plant', userInventory);
+			//code for planting devlings
+			if (userInventory.length > 0) {
+				for (let i = 0; i < userInventory.length; i++) {
+					if (userInventory[i].isPlanted === false) {
+						userInventory[i].isPlanted = true;
+						console.log('planting', userInventory[i]);
+					}
+				}
+			}
+		}
+		if (Phaser.Input.Keyboard.JustUp(this.spaceKey)) {
+			this.plantingInProgress = false;
 		}
 	}
 }
