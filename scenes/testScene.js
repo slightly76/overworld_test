@@ -14,7 +14,10 @@ export default class overworldScene extends Phaser.Scene {
 			frameWidth: 64,
 			frameHeight: 64,
 		});
-		this.load.audio('unacceptable', '../assets/unacceptable.mp3');
+		this.load.spritesheet('devlingImage', '../assets/devlingSpritesheet.png', {
+			frameWidth: 64,
+			frameHeight: 64,
+		});
 	}
 
 	create() {
@@ -47,6 +50,9 @@ export default class overworldScene extends Phaser.Scene {
 		this.waterTrigger.setVisible(false);
 		this.waterTriggered = false;
 
+		//create devling sprite images
+		this.devlingSprites = {}
+
 		//create player and add collision rules
 		this.player = new Player(this, 250, 300, 'playerSheet');
 		this.physics.add.collider(this.player, mapLayer);
@@ -78,12 +84,19 @@ export default class overworldScene extends Phaser.Scene {
 			Phaser.Input.Keyboard.JustDown(this.spaceKey)
 		) {
 			this.doorTriggered = true;
-
+			
 			//code for collecting devlings
 			if (database.length > 0 && userInventory.length === 0) {
 				for (let i = 0; i < database.length; i++) {
-					userInventory.push(database[i]);
-				}
+					const devling = database[i]
+					userInventory.push(devling);
+				
+			    //create devling visuals
+				const sprite = this.add.sprite(50 + i * 40, 50, 'devlingImage');
+				sprite.setInteractive()
+				sprite.setVisible(true);
+				this.devlingSprites[devling.name] = sprite;
+			}
 				console.log('devlings collected', userInventory);
 			}
 		} else if (
@@ -106,7 +119,7 @@ export default class overworldScene extends Phaser.Scene {
 			Phaser.Input.Keyboard.JustDown(this.spaceKey)
 		) {
 			//check user has devlings to plant or water (need to factor in location later? so that correct devling is being watered)
-			const hasUnplanted = userInventory.some(devling => !devling.isPlanted);
+			const hasUnplanted = userInventory.some(devling => !devling.isPlanted && !devling.isGrown);
 			const hasUnwatered = userInventory.some(devling => devling.isPlanted && !devling.isWatered && !devling.isGrown);
 			const grown = userInventory.some(devling => devling.isPlanted && devling.isWatered)
 
@@ -124,14 +137,20 @@ export default class overworldScene extends Phaser.Scene {
 				for (let i = 0; i < userInventory.length; i++) {
 					if (userInventory[i].isPlanted === false) {
 						userInventory[i].isPlanted = true;
-						console.log('planting', userInventory[i]);
-						break;
+
+					//Set devling to visible in inventory when grown and harvested
+					const sprite = this.devlingSprites[userInventory[i].name]
+					if(sprite) {
+						sprite.setVisible(false)
 					}
+					console.log('planting', userInventory[i]);
+					break;
 				}
 			}
+		}
+
 			//If all planted and not watered, we water
 			else if (hasUnwatered) {
-			console.log("attempting to water", userInventory)
 
 			for (let i = 0; i < userInventory.length; i++) {
 				if (userInventory[i].isPlanted === true && 
@@ -152,12 +171,18 @@ export default class overworldScene extends Phaser.Scene {
 					userInventory[i].isGrown = true
 					userInventory[i].isPlanted = false
 					userInventory[i].isWatered = false
-				    console.log(userInventory[i].name, "has grown and is ready to harvest!")
-					break;
-				}
+				
+				//Set devling to visible in inventory when grown and harvested
+				const sprite = this.devlingSprites[userInventory[i].name]
+				if(sprite) {
+					sprite.setVisible(true)
+					}
+			
+			console.log(userInventory[i].name, "has grown and has been harvested!")
+			break;
 			}
 		}
-		console.log(userInventory)
+	}
 
 		if (Phaser.Input.Keyboard.JustUp(this.spaceKey)) {
 			this.plantingInProgress = false
