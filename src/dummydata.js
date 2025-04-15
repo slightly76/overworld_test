@@ -9,6 +9,8 @@ export const database = [
 		presenting: 4,
 		sprite: '../assets/devling.png',
 		isPlanted: false,
+		isWatered: false,
+		isGrown: false
 	},
 	{
 		name: 'chris',
@@ -19,6 +21,8 @@ export const database = [
 		presenting: 5,
 		sprite: '../assets/devling.png',
 		isPlanted: false,
+		isWatered: false,
+		isGrown: false
 	},
 ];
 
