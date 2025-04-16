@@ -15,6 +15,7 @@ export class mainScene extends Phaser.Scene {
 }
 
 const config = {
+
   type: Phaser.AUTO,
   width: 1024,
   height: 576,
@@ -27,8 +28,8 @@ const config = {
     createContainer: true,
   },
   scale: {
-    // mode: Phaser.Scale.FIT,
-    // autoCenter: Phaser.Scale.CENTER_BOTH,
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
     // zoom: window.screen.availWidth / 200,
   },
   physics: {
@@ -49,6 +50,7 @@ const config = {
     officeScene,
     battleScene,
   ],
+
 };
 
 const game = new Phaser.Game(config);
