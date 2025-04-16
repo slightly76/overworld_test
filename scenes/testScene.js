@@ -2,10 +2,11 @@ import Phaser from 'phaser';
 import Player from '../src/player.js';
 import { database, userInventory } from '../src/dummydata.js';
 
+
 export default class overworldScene extends Phaser.Scene {
-	constructor() {
-		super('overworldScene');
-	}
+  constructor() {
+    super("overworldScene");
+  }
 
 	preload() {
 		this.load.tilemapTiledJSON('map', '../assets/overworld.JSON');
@@ -20,23 +21,20 @@ export default class overworldScene extends Phaser.Scene {
 		});
 	}
 
-	create() {
-		//scene fades in
-		this.cameras.main.fadeIn(1000, 0, 0, 0);
 
-		// create map
-		const map = this.make.tilemap({ key: 'map' });
-		const tilesets = map.addTilesetImage('1_Terrains_32x32', 'mapImage');
-		const mapLayer = map.createLayer('grass', tilesets, 0, 0);
-		mapLayer.setCollisionByProperty({ collide: true });
-		this.locationLayer = map.createLayer('locations', tilesets, 0, 0);
-		this.locationLayer.setCollisionByProperty({ collide: true });
+  create() {
+    this.spaceKey = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE
+    );
 
-		//create hidden trigger sprite for doors etc
-		this.doorTrigger = this.physics.add.sprite(272, 240, null);
-		this.doorTrigger.setSize(42, 42);
-		this.doorTrigger.setVisible(false);
-		this.doorTriggered = false;
+    this.cameras.main.fadeIn(1000, 0, 0, 0);
+
+    const map = this.make.tilemap({ key: "map" });
+    const tilesets = map.addTilesetImage("1_Terrains_32x32", "mapImage");
+    const mapLayer = map.createLayer("grass", tilesets, 0, 0);
+    mapLayer.setCollisionByProperty({ collide: true });
+    this.locationLayer = map.createLayer("locations", tilesets, 0, 0);
+    this.locationLayer.setCollisionByProperty({ collide: true });
 
 		//create hidden trigger for planting devling
 		this.plantTrigger = this.physics.add.sprite(272, 400, null);
@@ -63,8 +61,15 @@ export default class overworldScene extends Phaser.Scene {
 		);
 	}
 
-	update() {
-		this.player.update();
+
+    this.sceneTriggers = [
+      { name: "farmScene", x: 272, y: 240 },
+      { name: "officeScene", x: 300, y: 320 },
+      { name: "battleScene", x: 120, y: 420 },
+      //ADVANCED TODO: TECH DUNGEON
+      // { name: "techDungeon", x: 120, y: 420 },
+    ];
+
 
 		const playerBounds = new Phaser.Geom.Rectangle(
 			this.player.x - this.player.width / 2 + 24,
@@ -189,5 +194,6 @@ export default class overworldScene extends Phaser.Scene {
 			this.wateringInProgress = false;
 		}
 	}
+
 }
 }
